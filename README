@@ -1,0 +1,27 @@
+# To compile:
+
+1) cd cpucycles
+2) sh do
+3) cd ..
+4) gcc -levent  timer.c ./cpucycles/cpucycles.o -o timer
+
+# To run:
+timer [IP] [port] [cookie]
+
+## for example:
+./timer 127.0.0.1 4567 foo=hafdf
+Connecting to:
+        IP: 127.0.0.1
+        Port: 4567
+        Cookie: foo=hafdf
+115766188
+116869425
+114316271
+...
+
+# To do:
+
+* verify that the timing numbers make sense
+* allow domain names, not just IPs
+* allow setting URI path
+* maybe host: headers and such?
