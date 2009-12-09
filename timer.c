@@ -16,14 +16,16 @@
 #include <evhttp.h>
 #include "cpucycles/cpucycles.h"
 
+/* why, yes. this *is* a pile of global variables. thanks for noticing! */
+
 static struct evhttp_connection *conn;
 static struct evhttp_request    *req;
 
-static long long counter = 0;
-
-static char *ip;
-static int   port;
-static char *cookie;
+static long long  counter = 0;
+static char      *ip;
+static int        port;
+static char      *cookie;
+static char      *path;
 
 void make_new_request(void);
 
@@ -43,19 +45,20 @@ void make_new_request(void) {
   assert(req);
   evhttp_add_header(req->output_headers, "Cookie", cookie);
 
-  assert(evhttp_make_request(conn, req, EVHTTP_REQ_GET, "/") != -1);
+  assert(evhttp_make_request(conn, req, EVHTTP_REQ_GET, path) != -1);
 }
 
 int main ( int argc, char *argv[] ) {
   if (argc != 4) {
-    fprintf(stderr, "Usage: timer [IP] [port] [cookie]\n");
+    fprintf(stderr, "Usage: timer [IP] [port] [path] [cookie]\n");
     exit(1);
   }
 
   ip     = argv[1];
   port   = atoi(argv[2]);
-  cookie = argv[3];
-  fprintf(stderr, "Connecting to:\n\tIP: %s\n\tPort: %d\n\tCookie: %s\n", ip, port, cookie);
+  path   = argv[3];
+  cookie = argv[4];
+  fprintf(stderr, "Connecting to:\n\tIP: %s\n\tPort: %d\n\tPath: %s\n\tCookie: %s\n", ip, port, path, cookie);
 
   event_init();
 
