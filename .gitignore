@@ -1,0 +1,5 @@
+*.swp
+timer
+cpucycles/do.notes
+cpucycles/cpucycles.o
+cpucycles/cpucycles.h
