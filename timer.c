@@ -28,9 +28,13 @@ static char      *cookie;
 static char      *path;
 static long       count = 0;
 
-void make_new_request(void);
+#define SETTLE_TIME 10000                          /* usec to wait between reqs */
 
-void request_finished(struct evhttp_request *req, void *arg) {
+void allow_things_to_settle(void);
+void make_new_request(int fd, short type, void *args);
+void request_finished(struct evhttp_request *req, void *args);
+
+void request_finished(struct evhttp_request *req, void *args) {
   long long newcycles = cpucycles();
 
   if (cycles) {
@@ -41,13 +45,21 @@ void request_finished(struct evhttp_request *req, void *arg) {
   count--;
 
   if (count) {
-    make_new_request();
+    allow_things_to_settle();
   } else {
     event_loopbreak();                          /* we're done. */
   }
 }
 
-void make_new_request(void) {
+void allow_things_to_settle() {
+  struct timeval delay;
+  delay.tv_sec = 0;
+  delay.tv_usec = SETTLE_TIME;
+
+  event_once(-1, EV_TIMEOUT, make_new_request, NULL, &delay);
+}
+
+void make_new_request(int fd, short type, void *args) {
   req  = evhttp_request_new(request_finished, NULL);
   assert(req);
   evhttp_add_header(req->output_headers, "Cookie", cookie);
@@ -73,7 +85,7 @@ int main ( int argc, char *argv[] ) {
   conn = evhttp_connection_new(ip, port);
   assert(conn);
 
-  make_new_request();
+  allow_things_to_settle();
   
 	event_dispatch();
 
