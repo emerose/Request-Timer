@@ -21,23 +21,30 @@
 static struct evhttp_connection *conn;
 static struct evhttp_request    *req;
 
-static long long  counter = 0;
+static long long  cycles = 0;
 static char      *ip;
 static int        port;
 static char      *cookie;
 static char      *path;
+static long       count = 0;
 
 void make_new_request(void);
 
 void request_finished(struct evhttp_request *req, void *arg) {
-  long long newcounter = cpucycles();
+  long long newcycles = cpucycles();
 
-  if (counter) {
-    fprintf(stdout, "%lld\n", newcounter - counter);
+  if (cycles) {
+    fprintf(stdout, "%lld\n", newcycles - cycles);
   }
-  counter = newcounter;
+  cycles = newcycles;
 
-  make_new_request();
+  count--;
+
+  if (count) {
+    make_new_request();
+  } else {
+    event_loopbreak();                          /* we're done. */
+  }
 }
 
 void make_new_request(void) {
@@ -49,8 +56,8 @@ void make_new_request(void) {
 }
 
 int main ( int argc, char *argv[] ) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: timer [IP] [port] [path] [cookie]\n");
+  if (argc != 6) {
+    fprintf(stderr, "Usage: timer [IP] [port] [path] [cookie] [count]\n");
     exit(1);
   }
 
@@ -58,7 +65,8 @@ int main ( int argc, char *argv[] ) {
   port   = atoi(argv[2]);
   path   = argv[3];
   cookie = argv[4];
-  fprintf(stderr, "Connecting to:\n\tIP: %s\n\tPort: %d\n\tPath: %s\n\tCookie: %s\n", ip, port, path, cookie);
+  count  = atol(argv[5]);
+  fprintf(stderr, "Making %ld requests to:\n\tIP: %s\n\tPort: %d\n\tPath: %s\n\tCookie: %s\n", count, ip, port, path, cookie);
 
   event_init();
 
@@ -69,6 +77,7 @@ int main ( int argc, char *argv[] ) {
   
 	event_dispatch();
 
+  fprintf(stderr, "Done.");
   evhttp_connection_free(conn);
   return 0;
 }
