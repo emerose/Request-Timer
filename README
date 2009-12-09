@@ -6,22 +6,28 @@
 4) gcc -levent  timer.c ./cpucycles/cpucycles.o -o timer
 
 # To run:
-timer [IP] [port] [cookie]
+timer [IP] [port] [path] [cookie] [count]
 
 ## for example:
-./timer 127.0.0.1 4567 foo=hafdf
-Connecting to:
+./timer 127.0.0.1 4567 / foo 10
+Making 10 requests to:
         IP: 127.0.0.1
         Port: 4567
-        Cookie: foo=hafdf
-115766188
-116869425
-114316271
-...
+        Path: /
+        Cookie: foo
+120252007
+116636234
+113362964
+112024613
+116890198
+113965532
+114060342
+119901886
+114473685
+Done.
 
 # To do:
 
 * verify that the timing numbers make sense
 * allow domain names, not just IPs
-* allow setting URI path
 * maybe host: headers and such?
